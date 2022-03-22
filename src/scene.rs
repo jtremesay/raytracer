@@ -4,7 +4,6 @@ use crate::math::Vector3;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
-use yaml_rust::yaml::Yaml;
 use yaml_rust::YamlLoader;
 
 /**

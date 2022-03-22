@@ -12,11 +12,10 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let args_count = args.len();
     let mut i = 1;
-    while (i < args_count) {
+    while i < args_count {
         let arg = &args[i];
         let next_arg = args.get(i + 1);
 
-        println!("{}", arg);
         if arg == "-w" || arg == "--width" {
             if let Some(next_arg) = next_arg {
                 canvas_width = next_arg.parse().unwrap();
