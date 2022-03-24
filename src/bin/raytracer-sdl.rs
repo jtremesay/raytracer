@@ -1,11 +1,13 @@
 extern crate sdl2;
 
-use raytracer::canvas::SDLCanvas;
+use raytracer::canvas::FrameBufferCanvas;
 use raytracer::render::render;
 use raytracer::scene::Scene;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
+use sdl2::pixels::PixelFormatEnum;
+use sdl2::rect::Rect;
 use std::env;
 use std::path::Path;
 use std::time::Instant;
@@ -56,9 +58,16 @@ pub fn main() -> Result<(), String> {
         .map_err(|e| e.to_string())?;
 
     let mut sdl_canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
+    let texture_creator = sdl_canvas.texture_creator();
+    let mut texture = texture_creator
+        .create_texture_streaming(PixelFormatEnum::RGB24, canvas_width, canvas_height)
+        .map_err(|e| e.to_string())?;
+
     let mut event_pump = sdl_context.event_pump()?;
+    let mut canvas = FrameBufferCanvas::new(canvas_width, canvas_height);
 
     let mut previous_now = Instant::now();
+    let mut frame_count = 1;
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -73,8 +82,14 @@ pub fn main() -> Result<(), String> {
 
         sdl_canvas.set_draw_color(Color::RGB(255, 0, 255));
         sdl_canvas.clear();
-        let mut canvas = SDLCanvas::new(canvas_width, canvas_height, &mut sdl_canvas);
+
         render(&scene, &mut canvas);
+        canvas.copy_to_texture(&mut texture);
+        sdl_canvas.copy(
+            &texture,
+            None,
+            Some(Rect::new(0, 0, canvas_width, canvas_height)),
+        )?;
         sdl_canvas.present();
 
         let now = Instant::now();
@@ -82,7 +97,8 @@ pub fn main() -> Result<(), String> {
         previous_now = now;
 
         let dt = diff.as_secs_f32();
-        println!("{} {}", dt, 1.0 / dt);
+        println!("frame {}, dt {}s, {} fps", frame_count, dt, 1.0 / dt);
+        frame_count += 1;
     }
 
     Ok(())
