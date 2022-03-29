@@ -135,3 +135,7 @@ pub fn lerp(x: f32, x0: f32, x1: f32, y0: f32, y1: f32) -> f32 {
 pub fn lerp01(x: f32, x0: f32, x1: f32) -> f32 {
     lerp(x, x0, x1, 0.0, 1.0)
 }
+
+pub fn lerp_color8(x: f32) -> u8 {
+    lerp(x, 0.0, 1.0, 0.0, 255.0) as u8
+}

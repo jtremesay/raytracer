@@ -51,7 +51,7 @@ pub fn render(scene: &Scene, canvas: &mut dyn Canvas) {
                 dist,
             );
             let color = trace_ray(scene, d, dist, INFINITY);
-            canvas.draw_pixel(x, y, color);
+            canvas.set_pixel(x, y, color);
         }
     }
 }
