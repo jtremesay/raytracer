@@ -12,6 +12,7 @@ pub struct Sphere {
     /** @brief Radius of the sphere */
     pub radius: f32,
     pub color: Color,
+    pub specular: f32,
 }
 
 impl Sphere {
@@ -22,11 +23,12 @@ impl Sphere {
      * @param radius the radius of the sphere
      * @param color the color of the sphere
      */
-    pub fn new(center: Vector3, radius: f32, color: Color) -> Self {
+    pub fn new(center: Vector3, radius: f32, color: Color, specular: f32) -> Self {
         Self {
             center,
             radius,
             color,
+            specular,
         }
     }
 

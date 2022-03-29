@@ -1,6 +1,6 @@
 use crate::color::Color;
 use crate::geometry::Sphere;
-use crate::light::{AmbientLight, DirectionalLight, Light, OminidirectionalLight};
+use crate::light::Light;
 use crate::math::Vector3;
 use std::fs::File;
 use std::io::prelude::*;
@@ -55,7 +55,7 @@ impl Default for Camera {
 pub struct Scene {
     pub camera: Camera,
     pub spheres: Vec<Sphere>,
-    pub lights: Vec<Box<dyn Light>>,
+    pub lights: Vec<Light>,
 }
 
 impl Scene {
@@ -98,25 +98,25 @@ impl Scene {
             let light_type = light_data["type"].as_str().unwrap();
             let light_intensity = light_data["intensity"].as_f64().unwrap() as f32;
             let light = if light_type == "ambient" {
-                Box::new(AmbientLight::new(light_intensity)) as Box<dyn Light>
+                Light::Ambient(light_intensity)
             } else if light_type == "omnidirectional" {
-                Box::new(OminidirectionalLight::new(
+                Light::OmniDirectional(
                     light_intensity,
                     Vector3::new(
                         light_data["source"]["x"].as_f64().unwrap() as f32,
                         light_data["source"]["y"].as_f64().unwrap() as f32,
                         light_data["source"]["z"].as_f64().unwrap() as f32,
                     ),
-                )) as Box<dyn Light>
+                )
             } else if light_type == "directional" {
-                Box::new(DirectionalLight::new(
+                Light::Directional(
                     light_intensity,
                     Vector3::new(
                         light_data["direction"]["x"].as_f64().unwrap() as f32,
                         light_data["direction"]["y"].as_f64().unwrap() as f32,
                         light_data["direction"]["z"].as_f64().unwrap() as f32,
                     ),
-                )) as Box<dyn Light>
+                )
             } else {
                 panic!("Unsupported light type");
             };
@@ -137,6 +137,7 @@ impl Scene {
                     sphere_data["color"]["g"].as_f64().unwrap() as f32,
                     sphere_data["color"]["b"].as_f64().unwrap() as f32,
                 ),
+                sphere_data["specular"].as_f64().unwrap() as f32,
             );
             scene.spheres.push(sphere);
         }

@@ -36,6 +36,7 @@ spheres:
       r: 1.0
       g: 1.0
       b: 0.0
+    specular: 1000.0
   -
     position:
       x: 0.0
@@ -46,6 +47,7 @@ spheres:
       r: 1.0
       g: 0.0
       b: 0.0
+    specular: 500.0
   -
     position:
       x: 2.0
@@ -56,6 +58,7 @@ spheres:
       r: 0.0
       g: 0.0
       b: 1.0
+    specular: 500.0
   -
     position:
       x: -2.0
@@ -66,3 +69,4 @@ spheres:
       r: 0.0
       g: 1.0
       b: 0.0
+    specular: 10.0
