@@ -31,7 +31,7 @@ fn trace_ray(scene: &Scene, d: Vector3, t_min: f32, t_max: f32) -> Color {
         for light in scene.lights.iter() {
             light_intensity += light.compute(p, n);
         }
-        light_intensity = light_intensity.clamp(0.0, 1.1);
+        light_intensity = light_intensity.clamp(0.0, 1.0);
 
         return color * light_intensity;
     }
