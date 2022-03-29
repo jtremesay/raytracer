@@ -40,6 +40,10 @@ impl Vector3 {
     pub fn dot(&self, o: Self) -> f32 {
         self.x * o.x + self.y * o.y + self.z * o.z
     }
+
+    pub fn normalize(self) -> Self {
+        self / self.dot(self)
+    }
 }
 
 impl Default for Vector3 {
