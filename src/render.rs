@@ -24,7 +24,16 @@ fn trace_ray(scene: &Scene, d: Vector3, t_min: f32, t_max: f32) -> Color {
     }
 
     if let Some(sphere) = closest_sphere {
-        return sphere.color;
+        let color = sphere.color;
+        let p = scene.camera.position + d * closest_t;
+        let n = (p - sphere.center).normalize();
+        let mut light_intensity = 0.0;
+        for light in scene.lights.iter() {
+            light_intensity += light.compute(p, n);
+        }
+        light_intensity = light_intensity.clamp(0.0, 1.1);
+
+        return color * light_intensity;
     }
 
     Color::WHITE
