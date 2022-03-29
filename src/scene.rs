@@ -1,5 +1,6 @@
 use crate::color::Color;
 use crate::geometry::Sphere;
+use crate::light::{AmbientLight, DirectionalLight, Light, OminidirectionalLight};
 use crate::math::Vector3;
 use std::fs::File;
 use std::io::prelude::*;
@@ -54,6 +55,7 @@ impl Default for Camera {
 pub struct Scene {
     pub camera: Camera,
     pub spheres: Vec<Sphere>,
+    pub lights: Vec<Box<dyn Light>>,
 }
 
 impl Scene {
@@ -61,12 +63,9 @@ impl Scene {
         Self {
             camera: Camera::default(),
             spheres: vec![],
+            lights: vec![],
         }
     }
-
-    // fn add_object(&mut self, object: Box<dyn Node + Send>) {
-    //     self.nodes.push(object);
-    // }
 
     pub fn load_from_file(path: &Path) -> Self {
         // Read the file
@@ -93,6 +92,36 @@ impl Scene {
         scene.camera.view_port.distance = scene_data["camera"]["view_port"]["distance"]
             .as_f64()
             .unwrap() as f32;
+
+        // Create the lights
+        for light_data in scene_data["lights"].as_vec().unwrap().iter() {
+            let light_type = light_data["type"].as_str().unwrap();
+            let light_intensity = light_data["intensity"].as_f64().unwrap() as f32;
+            let light = if light_type == "ambient" {
+                Box::new(AmbientLight::new(light_intensity)) as Box<dyn Light>
+            } else if light_type == "omnidirectional" {
+                Box::new(OminidirectionalLight::new(
+                    light_intensity,
+                    Vector3::new(
+                        light_data["source"]["x"].as_f64().unwrap() as f32,
+                        light_data["source"]["y"].as_f64().unwrap() as f32,
+                        light_data["source"]["z"].as_f64().unwrap() as f32,
+                    ),
+                )) as Box<dyn Light>
+            } else if light_type == "directional" {
+                Box::new(DirectionalLight::new(
+                    light_intensity,
+                    Vector3::new(
+                        light_data["direction"]["x"].as_f64().unwrap() as f32,
+                        light_data["direction"]["y"].as_f64().unwrap() as f32,
+                        light_data["direction"]["z"].as_f64().unwrap() as f32,
+                    ),
+                )) as Box<dyn Light>
+            } else {
+                panic!("Unsupported light type");
+            };
+            scene.lights.push(light)
+        }
 
         // Create the spheres
         for sphere_data in scene_data["spheres"].as_vec().unwrap().iter() {
