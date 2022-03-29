@@ -1,5 +1,6 @@
 use crate::color::Color;
 use crate::geometry::Sphere;
+use crate::light::Light;
 use crate::math::Vector3;
 use std::fs::File;
 use std::io::prelude::*;
@@ -54,6 +55,7 @@ impl Default for Camera {
 pub struct Scene {
     pub camera: Camera,
     pub spheres: Vec<Sphere>,
+    pub lights: Vec<Light>,
 }
 
 impl Scene {
@@ -61,12 +63,9 @@ impl Scene {
         Self {
             camera: Camera::default(),
             spheres: vec![],
+            lights: vec![],
         }
     }
-
-    // fn add_object(&mut self, object: Box<dyn Node + Send>) {
-    //     self.nodes.push(object);
-    // }
 
     pub fn load_from_file(path: &Path) -> Self {
         // Read the file
@@ -94,6 +93,36 @@ impl Scene {
             .as_f64()
             .unwrap() as f32;
 
+        // Create the lights
+        for light_data in scene_data["lights"].as_vec().unwrap().iter() {
+            let light_type = light_data["type"].as_str().unwrap();
+            let light_intensity = light_data["intensity"].as_f64().unwrap() as f32;
+            let light = if light_type == "ambient" {
+                Light::Ambient(light_intensity)
+            } else if light_type == "omnidirectional" {
+                Light::OmniDirectional(
+                    light_intensity,
+                    Vector3::new(
+                        light_data["source"]["x"].as_f64().unwrap() as f32,
+                        light_data["source"]["y"].as_f64().unwrap() as f32,
+                        light_data["source"]["z"].as_f64().unwrap() as f32,
+                    ),
+                )
+            } else if light_type == "directional" {
+                Light::Directional(
+                    light_intensity,
+                    Vector3::new(
+                        light_data["direction"]["x"].as_f64().unwrap() as f32,
+                        light_data["direction"]["y"].as_f64().unwrap() as f32,
+                        light_data["direction"]["z"].as_f64().unwrap() as f32,
+                    ),
+                )
+            } else {
+                panic!("Unsupported light type");
+            };
+            scene.lights.push(light)
+        }
+
         // Create the spheres
         for sphere_data in scene_data["spheres"].as_vec().unwrap().iter() {
             let sphere = Sphere::new(
@@ -108,6 +137,7 @@ impl Scene {
                     sphere_data["color"]["g"].as_f64().unwrap() as f32,
                     sphere_data["color"]["b"].as_f64().unwrap() as f32,
                 ),
+                sphere_data["specular"].as_f64().unwrap() as f32,
             );
             scene.spheres.push(sphere);
         }

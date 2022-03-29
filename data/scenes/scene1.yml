@@ -7,7 +7,36 @@ camera:
     width: 1.0
     height: 1.0
     distance: 1.0
-spheres:
+lights:
+  -
+    type: ambient
+    intensity: 0.2
+  -
+    type: omnidirectional
+    intensity: 0.6
+    source:
+      x: 2.0
+      y: 1.0
+      z: 0.0
+  -
+    type: directional
+    intensity: 0.2
+    direction:
+      x: 1.0
+      y: 4.0
+      z: 4.0
+spheres:  
+  -
+    position:
+      x: 0.0
+      y: -5001.0
+      z: 0.0
+    radius: 5000.0
+    color:
+      r: 1.0
+      g: 1.0
+      b: 0.0
+    specular: 1000.0
   -
     position:
       x: 0.0
@@ -18,6 +47,7 @@ spheres:
       r: 1.0
       g: 0.0
       b: 0.0
+    specular: 500.0
   -
     position:
       x: 2.0
@@ -28,6 +58,7 @@ spheres:
       r: 0.0
       g: 0.0
       b: 1.0
+    specular: 500.0
   -
     position:
       x: -2.0
@@ -38,3 +69,4 @@ spheres:
       r: 0.0
       g: 1.0
       b: 0.0
+    specular: 10.0
