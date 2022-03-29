@@ -1,3 +1,5 @@
+use std::ops::Mul;
+
 /**
  * @brief A RGB color
  */
@@ -51,5 +53,13 @@ impl Color {
     };
     pub fn new(r: f32, g: f32, b: f32) -> Self {
         Self { r, g, b }
+    }
+}
+
+impl Mul<f32> for Color {
+    type Output = Self;
+
+    fn mul(self, o: f32) -> Self::Output {
+        Self::Output::new(self.r * o, self.g * o, self.b * o)
     }
 }
