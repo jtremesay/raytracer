@@ -2,8 +2,8 @@ extern crate sdl2;
 
 use raytracer::canvas::FrameBufferCanvas;
 use raytracer::image::save_canvas_to_file;
+use raytracer::loader::load_scene_from_file;
 use raytracer::render::render;
-use raytracer::scene::Scene;
 use raytracer::sdl::copy_canvas_to_texture;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -53,7 +53,7 @@ pub fn main() -> Result<(), String> {
     }
 
     // Create the scene
-    let scene = Scene::load_from_file(&scene_path);
+    let scene = load_scene_from_file(&scene_path);
 
     // Create the canvas
     let mut canvas = FrameBufferCanvas::new(canvas_width, canvas_height);
