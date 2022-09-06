@@ -39,6 +39,7 @@ pub fn sdl_main(scene: &Scene, canvas: &mut dyn Canvas) -> Result<(), String> {
     // Start the main loop
     let mut previous_now = Instant::now();
     let mut frame_count = 1;
+    let mut fps_counter = 0.0;
     'running: loop {
         // Handle the events
         for event in event_pump.poll_iter() {
@@ -94,7 +95,16 @@ pub fn sdl_main(scene: &Scene, canvas: &mut dyn Canvas) -> Result<(), String> {
 
         // Print dt und update the frame count
         let dt = diff.as_secs_f32();
-        println!("frame {}, dt {}s, {} fps", frame_count, dt, 1.0 / dt);
+        fps_counter += dt;
+        if frame_count % 60 == 0 {
+            println!(
+                "frame {}, avg dt {}s, avg {} fps",
+                frame_count,
+                fps_counter / 60.0,
+                1.0 / (fps_counter / 60.0)
+            );
+            fps_counter = 0.0;
+        }
         frame_count += 1;
     }
     Ok(())
