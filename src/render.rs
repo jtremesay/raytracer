@@ -96,13 +96,13 @@ pub fn render(scene: &Scene, canvas: &mut dyn Canvas) {
                 let normal = (hit_position - sphere.center).normalize();
 
                 // Compute the color
-                color = sphere.color
+                color = sphere.material.color
                     * compute_light(
                         &scene.lights,
                         hit_position,
                         normal,
                         -direction,
-                        sphere.specular,
+                        sphere.material.specular,
                     );
             }
 

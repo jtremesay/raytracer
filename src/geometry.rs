@@ -1,18 +1,18 @@
 use crate::color::Color;
+use crate::material::Material;
 use crate::math::Vector3;
 use std::f32::INFINITY;
 
 /**
  * @brief A sphere
  */
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct Sphere {
     /** @brief Center of the sphere */
     pub center: Vector3,
     /** @brief Radius of the sphere */
     pub radius: f32,
-    pub color: Color,
-    pub specular: f32,
+    pub material: Material,
 }
 
 impl Sphere {
@@ -23,12 +23,11 @@ impl Sphere {
      * @param radius the radius of the sphere
      * @param color the color of the sphere
      */
-    pub fn new(center: Vector3, radius: f32, color: Color, specular: f32) -> Self {
+    pub fn new(center: Vector3, radius: f32, material: Material) -> Self {
         Self {
             center,
             radius,
-            color,
-            specular,
+            material,
         }
     }
 

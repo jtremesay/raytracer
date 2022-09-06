@@ -1,6 +1,7 @@
 use crate::color::Color;
 use crate::geometry::Sphere;
 use crate::light::Light;
+use crate::material::Material;
 use crate::math::Vector3;
 use crate::scene::Scene;
 use std::fs::File;
@@ -73,12 +74,14 @@ pub fn load_scene_from_file(path: &Path) -> Scene {
                 sphere_data["position"]["z"].as_f64().unwrap() as f32,
             ),
             sphere_data["radius"].as_f64().unwrap() as f32,
-            Color::new(
-                sphere_data["color"]["r"].as_f64().unwrap() as f32,
-                sphere_data["color"]["g"].as_f64().unwrap() as f32,
-                sphere_data["color"]["b"].as_f64().unwrap() as f32,
+            Material::new(
+                Color::new(
+                    sphere_data["color"]["r"].as_f64().unwrap() as f32,
+                    sphere_data["color"]["g"].as_f64().unwrap() as f32,
+                    sphere_data["color"]["b"].as_f64().unwrap() as f32,
+                ),
+                sphere_data["specular"].as_f64().unwrap() as f32,
             ),
-            sphere_data["specular"].as_f64().unwrap() as f32,
         );
         scene.spheres.push(sphere);
     }

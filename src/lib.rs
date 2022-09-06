@@ -4,6 +4,7 @@ pub mod geometry;
 pub mod image;
 pub mod light;
 pub mod loader;
+pub mod material;
 pub mod math;
 pub mod render;
 pub mod scene;
