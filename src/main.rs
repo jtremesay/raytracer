@@ -127,10 +127,12 @@ pub fn main() -> Result<(), String> {
         // Present the SDL canvas
         sdl_canvas.present();
 
+        // Update the timer
         let now = Instant::now();
         let diff = now - previous_now;
         previous_now = now;
 
+        // Print dt und update the frame count
         let dt = diff.as_secs_f32();
         println!("frame {}, dt {}s, {} fps", frame_count, dt, 1.0 / dt);
         frame_count += 1;
