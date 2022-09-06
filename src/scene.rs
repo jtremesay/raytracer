@@ -2,7 +2,6 @@ use crate::color::Color;
 use crate::geometry::Sphere;
 use crate::light::Light;
 use crate::math::Vector3;
-use std::f32::INFINITY;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
@@ -99,9 +98,9 @@ impl Scene {
             let light_type = light_data["type"].as_str().unwrap();
             let light_intensity = light_data["intensity"].as_f64().unwrap() as f32;
             let light = if light_type == "ambient" {
-                Light::Ambient(light_intensity)
+                Light::create_ambiant(light_intensity)
             } else if light_type == "omnidirectional" {
-                Light::OmniDirectional(
+                Light::create_omnidirectional(
                     light_intensity,
                     Vector3::new(
                         light_data["source"]["x"].as_f64().unwrap() as f32,
@@ -110,7 +109,7 @@ impl Scene {
                     ),
                 )
             } else if light_type == "directional" {
-                Light::Directional(
+                Light::create_directional(
                     light_intensity,
                     Vector3::new(
                         light_data["direction"]["x"].as_f64().unwrap() as f32,
@@ -144,24 +143,5 @@ impl Scene {
         }
 
         return scene;
-    }
-
-    pub fn find_nearest_sphere(
-        &self,
-        d: Vector3,
-        t_min: f32,
-        t_max: f32,
-    ) -> (Option<&Sphere>, f32) {
-        // Search the nearest sphere
-        let mut closest_t = INFINITY;
-        let mut closest_sphere = None;
-        for sphere in self.spheres.iter() {
-            let t = sphere.distance_to(self.camera.position, d);
-            if t >= t_min && t <= t_max && t < closest_t {
-                closest_t = t;
-                closest_sphere = Some(sphere);
-            }
-        }
-        (closest_sphere, closest_t)
     }
 }

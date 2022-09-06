@@ -1,92 +1,53 @@
 use crate::canvas::Canvas;
 use crate::color::Color;
-use crate::geometry::Sphere;
 use crate::light::Light;
+use crate::light::LightKind;
 use crate::math::Vector3;
-use crate::scene::Camera;
 use crate::scene::Scene;
 use std::f32::INFINITY;
 
-fn compute_light(lights: &Vec<Light>, p: Vector3, n: Vector3, v: Vector3, s: f32) -> f32 {
+fn compute_light(
+    lights: &Vec<Light>,
+    hit_position: Vector3,
+    normal: Vector3,
+    inverse_direction: Vector3,
+    specular: f32,
+) -> f32 {
     let mut i = 0.0;
     for light in lights.iter() {
-        if let Light::Ambient(intensity) = light {
-            i += intensity;
+        if let LightKind::Ambient = light.kind {
+            // Ambiant light
+            i += light.intensity;
         } else {
-            let (l, intensity) = {
-                let l;
-                let intensity;
-
-                match light {
-                    Light::OmniDirectional(i, source) => {
-                        intensity = i;
-                        l = *source - p;
-                    }
-                    Light::Directional(i, direction) => {
-                        intensity = i;
-                        l = *direction;
-                    }
-                    _ => {
-                        continue;
-                    }
+            // Omnidirectional and directional
+            // Get the light direction and intensity
+            let light_direction = match light.kind {
+                LightKind::OmniDirectional => light.direction - hit_position,
+                LightKind::Directional => light.direction,
+                _ => {
+                    continue;
                 }
-
-                (l, intensity)
             };
 
             // Diffuse
-            let n_dot_l = n.dot(l);
+            let n_dot_l = normal.dot(light_direction);
             if n_dot_l > 0.0 {
-                i += intensity * n_dot_l / (n.length() * l.length());
+                i += light.intensity * n_dot_l / (normal.length() * light_direction.length());
             }
 
             // // Specular
-            if s > -1.0 {
-                let r = n * n.dot(l) * 2.0 - l;
-                let r_dot_v = r.dot(v);
+            if specular > -1.0 {
+                let r = normal * normal.dot(light_direction) * 2.0 - light_direction;
+                let r_dot_v = r.dot(inverse_direction);
                 if r_dot_v > 0.0 {
-                    i += intensity * (r_dot_v / (r.length() * v.length())).powf(s)
+                    i += light.intensity
+                        * (r_dot_v / (r.length() * inverse_direction.length())).powf(specular)
                 }
             }
         }
     }
 
     i
-}
-
-fn get_color_on_sphere(
-    camera: &Camera,
-    lights: &Vec<Light>,
-    direction: Vector3,
-    dist: f32,
-    sphere: &Sphere,
-) -> Color {
-    let color = sphere.color;
-    // Compute the position of the hit
-    let p = camera.position + direction * dist;
-
-    // Compute the normal of
-    let n = (p - sphere.center).normalize();
-    return color * compute_light(lights, p, n, -direction, sphere.specular);
-}
-
-/**
- * @brief Trace a ray into the scene
- *
- * @param scene the scene
- * @param d direction of the vector
- * @param t_min Where to start the trace
- * @param t_max The upper bound of the trace
- */
-fn trace_ray(scene: &Scene, d: Vector3, t_min: f32, t_max: f32) -> Color {
-    let (closest_sphere, closest_t) = scene.find_nearest_sphere(d, t_min, t_max);
-
-    // Draw the nearest sphere
-    if let Some(sphere) = closest_sphere {
-        return get_color_on_sphere(&scene.camera, &scene.lights, d, closest_t, &sphere);
-    }
-
-    Color::WHITE
 }
 
 /**
@@ -98,23 +59,52 @@ fn trace_ray(scene: &Scene, d: Vector3, t_min: f32, t_max: f32) -> Color {
 pub fn render(scene: &Scene, canvas: &mut dyn Canvas) {
     let channel_width = canvas.width();
     let channel_height = canvas.height();
-    let vw = scene.camera.view_port.width;
-    let vh = scene.camera.view_port.height;
-    let dist = scene.camera.view_port.distance;
+    let viewport_width = scene.camera.view_port.width;
+    let viewport_height = scene.camera.view_port.height;
+    let dist_to_canvat = scene.camera.view_port.distance;
 
     // Draw each pixel of the canvas
     for v in 0..channel_height {
         for u in 0..channel_width {
             // Compute the direction of the ray
-            let d = Vector3::new(
-                (u as f32 - channel_width as f32 / 2.0) * vw / channel_width as f32,
-                ((v * channel_height / channel_width) as f32 - channel_height as f32 / 2.0) * vh
+            let direction = Vector3::new(
+                (u as f32 - channel_width as f32 / 2.0) * viewport_width / channel_width as f32,
+                ((v * channel_height / channel_width) as f32 - channel_height as f32 / 2.0)
+                    * viewport_height
                     / channel_height as f32,
-                dist,
+                dist_to_canvat,
             );
 
-            // Trace the ray in the canvas
-            let color = trace_ray(scene, d, dist, INFINITY);
+            // Search the nearest sphere
+            let mut closest_t = INFINITY;
+            let mut closest_sphere = None;
+            for sphere in scene.spheres.iter() {
+                let t = sphere.distance_to(scene.camera.position, direction);
+                if t >= dist_to_canvat && t <= INFINITY && t < closest_t {
+                    closest_t = t;
+                    closest_sphere = Some(sphere);
+                }
+            }
+
+            // Compute the color at the hit position
+            let mut color = Color::WHITE;
+            if let Some(sphere) = closest_sphere {
+                // Compute the position of the hit
+                let hit_position = scene.camera.position + direction * closest_t;
+
+                // Compute the normal of the hit
+                let normal = (hit_position - sphere.center).normalize();
+
+                // Compute the color
+                color = sphere.color
+                    * compute_light(
+                        &scene.lights,
+                        hit_position,
+                        normal,
+                        -direction,
+                        sphere.specular,
+                    );
+            }
 
             // Draw the pixel
             canvas.set_pixel(u, v, color);
