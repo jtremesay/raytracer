@@ -88,21 +88,28 @@ fn trace_ray(scene: &Scene, d: Vector3, t_min: f32, t_max: f32) -> Color {
  * @param canvas the output canvas
  */
 pub fn render(scene: &Scene, canvas: &mut dyn Canvas) {
-    let cw = canvas.width();
-    let ch = canvas.height();
+    let channel_width = canvas.width();
+    let channel_height = canvas.height();
     let vw = scene.camera.view_port.width;
     let vh = scene.camera.view_port.height;
     let dist = scene.camera.view_port.distance;
 
-    for y in 0..ch {
-        for x in 0..cw {
+    // Draw each pixel of the canvas
+    for v in 0..channel_height {
+        for u in 0..channel_width {
+            // Compute the direction of the ray
             let d = Vector3::new(
-                (x as f32 - cw as f32 / 2.0) * vw / cw as f32,
-                ((y * ch / cw) as f32 - ch as f32 / 2.0) * vh / ch as f32,
+                (u as f32 - channel_width as f32 / 2.0) * vw / channel_width as f32,
+                ((v * channel_height / channel_width) as f32 - channel_height as f32 / 2.0) * vh
+                    / channel_height as f32,
                 dist,
             );
+
+            // Trace the ray in the canvas
             let color = trace_ray(scene, d, dist, INFINITY);
-            canvas.set_pixel(x, y, color);
+
+            // Draw the pixel
+            canvas.set_pixel(u, v, color);
         }
     }
 }
