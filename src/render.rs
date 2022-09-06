@@ -1,13 +1,15 @@
 use crate::canvas::Canvas;
 use crate::color::Color;
+use crate::geometry::Sphere;
 use crate::light::Light;
 use crate::math::Vector3;
+use crate::scene::Camera;
 use crate::scene::Scene;
 use std::f32::INFINITY;
 
-fn compute_light(scene: &Scene, p: Vector3, n: Vector3, v: Vector3, s: f32) -> f32 {
+fn compute_light(lights: &Vec<Light>, p: Vector3, n: Vector3, v: Vector3, s: f32) -> f32 {
     let mut i = 0.0;
-    for light in scene.lights.iter() {
+    for light in lights.iter() {
         if let Light::Ambient(intensity) = light {
             i += intensity;
         } else {
@@ -52,6 +54,22 @@ fn compute_light(scene: &Scene, p: Vector3, n: Vector3, v: Vector3, s: f32) -> f
     i
 }
 
+fn get_color_on_sphere(
+    camera: &Camera,
+    lights: &Vec<Light>,
+    direction: Vector3,
+    dist: f32,
+    sphere: &Sphere,
+) -> Color {
+    let color = sphere.color;
+    // Compute the position of the hit
+    let p = camera.position + direction * dist;
+
+    // Compute the normal of
+    let n = (p - sphere.center).normalize();
+    return color * compute_light(lights, p, n, -direction, sphere.specular);
+}
+
 /**
  * @brief Trace a ray into the scene
  *
@@ -61,21 +79,11 @@ fn compute_light(scene: &Scene, p: Vector3, n: Vector3, v: Vector3, s: f32) -> f
  * @param t_max The upper bound of the trace
  */
 fn trace_ray(scene: &Scene, d: Vector3, t_min: f32, t_max: f32) -> Color {
-    let mut closest_t = INFINITY;
-    let mut closest_sphere = None;
-    for sphere in scene.spheres.iter() {
-        let t = sphere.distance_to(scene.camera.position, d);
-        if t >= t_min && t <= t_max && t < closest_t {
-            closest_t = t;
-            closest_sphere = Some(sphere);
-        }
-    }
+    let (closest_sphere, closest_t) = scene.find_nearest_sphere(d, t_min, t_max);
 
+    // Draw the nearest sphere
     if let Some(sphere) = closest_sphere {
-        let color = sphere.color;
-        let p = scene.camera.position + d * closest_t;
-        let n = (p - sphere.center).normalize();
-        return color * compute_light(&scene, p, n, -d, sphere.specular);
+        return get_color_on_sphere(&scene.camera, &scene.lights, d, closest_t, &sphere);
     }
 
     Color::WHITE
