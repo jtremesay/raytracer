@@ -7,26 +7,7 @@ use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::Rect;
-use sdl2::render::Texture;
 use std::time::Instant;
-
-pub fn copy_canvas_to_texture(canvas: &dyn Canvas, texture: &mut Texture) {
-    texture
-        .with_lock(None, |buffer: &mut [u8], pitch: usize| {
-            let (width, height) = (canvas.width(), canvas.height());
-            for y in 0..height {
-                for x in 0..width {
-                    let color = canvas.get_pixel(x, y);
-                    let offset_out = (height - 1 - y) as usize * pitch + x as usize * 3;
-
-                    buffer[offset_out] = lerp_color8(color.r);
-                    buffer[offset_out + 1] = lerp_color8(color.g);
-                    buffer[offset_out + 2] = lerp_color8(color.b);
-                }
-            }
-        })
-        .unwrap();
-}
 
 pub fn sdl_main(scene: &Scene, canvas: &mut dyn Canvas) -> Result<(), String> {
     // Inialize the sdl
@@ -80,7 +61,21 @@ pub fn sdl_main(scene: &Scene, canvas: &mut dyn Canvas) -> Result<(), String> {
         sdl_canvas.clear();
 
         // Copy the content of our canvas to the SDL texture
-        copy_canvas_to_texture(canvas, &mut texture);
+        texture
+            .with_lock(None, |buffer: &mut [u8], pitch: usize| {
+                let (width, height) = (canvas.width(), canvas.height());
+                for y in 0..height {
+                    for x in 0..width {
+                        let color = canvas.get_pixel(x, y);
+                        let offset_out = (height - 1 - y) as usize * pitch + x as usize * 3;
+
+                        buffer[offset_out] = lerp_color8(color.r);
+                        buffer[offset_out + 1] = lerp_color8(color.g);
+                        buffer[offset_out + 2] = lerp_color8(color.b);
+                    }
+                }
+            })
+            .unwrap();
 
         // Draw the SDL texture
         sdl_canvas.copy(
