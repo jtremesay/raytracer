@@ -76,11 +76,11 @@ pub fn load_scene_from_file(path: &Path) -> Scene {
             sphere_data["radius"].as_f64().unwrap() as f32,
             Material::new(
                 Color::new(
-                    sphere_data["color"]["r"].as_f64().unwrap() as f32,
-                    sphere_data["color"]["g"].as_f64().unwrap() as f32,
-                    sphere_data["color"]["b"].as_f64().unwrap() as f32,
+                    sphere_data["material"]["color"]["r"].as_f64().unwrap() as f32,
+                    sphere_data["material"]["color"]["g"].as_f64().unwrap() as f32,
+                    sphere_data["material"]["color"]["b"].as_f64().unwrap() as f32,
                 ),
-                sphere_data["specular"].as_f64().unwrap() as f32,
+                sphere_data["material"]["specular"].as_f64().unwrap() as f32,
             ),
         );
         scene.spheres.push(sphere);
