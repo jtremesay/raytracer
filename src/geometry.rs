@@ -1,4 +1,3 @@
-use crate::color::Color;
 use crate::material::Material;
 use crate::math::Vector3;
 use std::f32::INFINITY;
