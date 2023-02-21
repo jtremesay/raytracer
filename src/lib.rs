@@ -1,12 +1,13 @@
 pub mod camera;
 pub mod canvas;
 pub mod color;
-pub mod geometry;
 pub mod image;
 pub mod light;
 pub mod loader;
 pub mod material;
 pub mod math;
+pub mod ray;
 pub mod render;
 pub mod scene;
+pub mod sdf;
 pub mod sdl;

@@ -1,19 +1,9 @@
 use crate::camera::Camera;
-use crate::geometry::Sphere;
 use crate::light::Light;
+use crate::sdf::Node;
 
 pub struct Scene {
     pub camera: Camera,
-    pub spheres: Vec<Sphere>,
-    pub lights: Vec<Light>,
-}
-
-impl Scene {
-    pub fn new() -> Self {
-        Self {
-            camera: Camera::default(),
-            spheres: vec![],
-            lights: vec![],
-        }
-    }
+    pub root: Box<dyn Node>,
+    pub lights: Vec<Box<dyn Light>>,
 }

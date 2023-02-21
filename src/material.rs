@@ -7,7 +7,8 @@ pub struct Material {
 }
 
 impl Material {
-    pub fn new(color: Color, specular: f32) -> Self {
-        Self { color, specular }
-    }
+    pub const DEBUG_MATERIAL: Material = Material {
+        color: Color::MAGENTA,
+        specular: 0.0,
+    };
 }
