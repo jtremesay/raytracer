@@ -1,7 +1,6 @@
 use crate::camera::{Camera, ViewPort};
 use crate::color::Color;
-use crate::geometry::Sphere;
-use crate::light::{AmbiantLight, DirectionalLight, Light, OmniDirectionalLight};
+use crate::light::{AmbiantLight, DirectionalLight, OmniDirectionalLight};
 use crate::material::Material;
 use crate::math::Vector3;
 use crate::scene::Scene;
@@ -22,8 +21,8 @@ pub fn load_scene_from_file(path: &Path) -> Scene {
             },
         },
         root: Box::new(UnionNode {
-            node_a: Box::new(UnionNode {
-                node_a: Box::new(SphereNode {
+            nodes: vec![
+                Box::new(SphereNode {
                     position: Vector3::new(0.0, -5001.0, 0.0),
                     radius: 5000.0,
                     material: Material {
@@ -31,7 +30,7 @@ pub fn load_scene_from_file(path: &Path) -> Scene {
                         specular: 1000.0,
                     },
                 }),
-                node_b: Box::new(SphereNode {
+                Box::new(SphereNode {
                     position: Vector3::new(0.0, -1.0, 3.0),
                     radius: 1.0,
                     material: Material {
@@ -39,9 +38,7 @@ pub fn load_scene_from_file(path: &Path) -> Scene {
                         specular: 500.0,
                     },
                 }),
-            }),
-            node_b: Box::new(UnionNode {
-                node_a: Box::new(SphereNode {
+                Box::new(SphereNode {
                     position: Vector3::new(2.0, 0.0, 4.0),
                     radius: 1.0,
                     material: Material {
@@ -49,7 +46,7 @@ pub fn load_scene_from_file(path: &Path) -> Scene {
                         specular: 500.0,
                     },
                 }),
-                node_b: Box::new(SphereNode {
+                Box::new(SphereNode {
                     position: Vector3::new(-2.0, 0.0, 4.0),
                     radius: 1.0,
                     material: Material {
@@ -57,7 +54,7 @@ pub fn load_scene_from_file(path: &Path) -> Scene {
                         specular: 10.0,
                     },
                 }),
-            }),
+            ],
         }),
         lights: vec![
             Box::new(AmbiantLight { intensity: 0.2 }),

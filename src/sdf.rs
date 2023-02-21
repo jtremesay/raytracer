@@ -9,32 +9,15 @@ pub trait Node {
 }
 
 pub struct UnionNode {
-    pub node_a: Box<dyn Node>,
-    pub node_b: Box<dyn Node>,
+    pub nodes: Vec<Box<dyn Node>>,
 }
 
 impl Node for UnionNode {
     fn hit(&self, ray: &Ray) -> Option<Hit> {
-        let hit_a = self.node_a.hit(ray);
-        let hit_b = self.node_b.hit(ray);
-
-        if let Some(hit_a) = hit_a {
-            if let Some(hit_b) = hit_b {
-                if hit_a.distance < hit_b.distance {
-                    Some(hit_a)
-                } else {
-                    Some(hit_b)
-                }
-            } else {
-                Some(hit_a)
-            }
-        } else {
-            if let Some(hit_b) = hit_b {
-                Some(hit_b)
-            } else {
-                None
-            }
-        }
+        self.nodes
+            .iter()
+            .filter_map(|node| node.hit(ray))
+            .reduce(|acc, e| if acc.distance < e.distance { acc } else { e })
     }
 }
 
