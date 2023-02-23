@@ -7,7 +7,7 @@ use std::ops::Sub;
 /**
  * @brief A vector 3
  */
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Vector3 {
     pub x: f32,
     pub y: f32,
@@ -43,7 +43,7 @@ impl Vector3 {
     }
 
     pub fn normalize(self) -> Self {
-        self / self.dot(self)
+        self / self.length()
     }
 }
 
