@@ -114,7 +114,7 @@ pub fn parse_scene(data: &Yaml) -> Scene {
     Scene {
         camera: parse_camera(&data["camera"]),
         root: parse_node(&data["root"]),
-        lights: parse_ligths(&data["ligths"]),
+        lights: parse_ligths(&data["lights"]),
     }
 }
 
