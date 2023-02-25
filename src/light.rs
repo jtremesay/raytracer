@@ -1,6 +1,10 @@
+use std::any::Any;
+
 use crate::{math::Vector3, ray::Hit};
 
 pub trait Light {
+    fn as_any(&self) -> &dyn Any;
+
     fn compute_intensity(&self, hit: &Hit, inverse_direction: Vector3) -> f32;
 }
 
@@ -9,6 +13,10 @@ pub struct AmbiantLight {
 }
 
 impl Light for AmbiantLight {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
     fn compute_intensity(&self, _hit: &Hit, _inverse_direction: Vector3) -> f32 {
         self.intensity
     }
@@ -46,6 +54,10 @@ pub struct OmniDirectionalLight {
 }
 
 impl Light for OmniDirectionalLight {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
     fn compute_intensity(&self, hit: &Hit, inverse_direction: Vector3) -> f32 {
         compute_directional_light_intensity(
             self.intensity,
@@ -62,6 +74,10 @@ pub struct DirectionalLight {
 }
 
 impl Light for DirectionalLight {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
     fn compute_intensity(&self, hit: &Hit, inverse_direction: Vector3) -> f32 {
         compute_directional_light_intensity(self.intensity, self.direction, hit, inverse_direction)
     }

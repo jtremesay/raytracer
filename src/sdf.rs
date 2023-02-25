@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use crate::{
     material::Material,
     math::Vector3,
@@ -5,6 +7,7 @@ use crate::{
 };
 
 pub trait Node {
+    fn as_any(&self) -> &dyn Any;
     fn hit(&self, ray: &Ray) -> Option<Hit>;
 }
 
@@ -13,6 +16,10 @@ pub struct UnionNode {
 }
 
 impl Node for UnionNode {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
     fn hit(&self, ray: &Ray) -> Option<Hit> {
         self.nodes
             .iter()
@@ -28,6 +35,10 @@ pub struct SphereNode {
 }
 
 impl Node for SphereNode {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
     fn hit(&self, ray: &Ray) -> Option<Hit> {
         let co = ray.origin - self.position;
         let a = ray.direction.dot(ray.direction);

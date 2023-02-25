@@ -8,6 +8,7 @@ pub mod material;
 pub mod math;
 pub mod ray;
 pub mod render;
+pub mod saver;
 pub mod scene;
 pub mod sdf;
 pub mod sdl;
