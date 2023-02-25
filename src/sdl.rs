@@ -1,6 +1,6 @@
 use crate::canvas::Canvas;
 use crate::math::lerp_color8;
-use crate::render::render;
+use crate::render::Renderer;
 use crate::scene::Scene;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -9,7 +9,11 @@ use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::Rect;
 use std::time::Instant;
 
-pub fn sdl_main(scene: &Scene, canvas: &mut dyn Canvas) -> Result<(), String> {
+pub fn sdl_main(
+    scene: &Scene,
+    renderer: &dyn Renderer,
+    canvas: &mut dyn Canvas,
+) -> Result<(), String> {
     // Inialize the sdl
     let sdl_context = sdl2::init()?;
     let video_subsystem = sdl_context.video()?;
@@ -54,7 +58,7 @@ pub fn sdl_main(scene: &Scene, canvas: &mut dyn Canvas) -> Result<(), String> {
         }
 
         // Render the scene to our canvas
-        render(&scene, canvas);
+        renderer.render(&scene, canvas);
 
         // Clear the SDL canvas with a nice magenta color for
         // catching undrawn pixels
