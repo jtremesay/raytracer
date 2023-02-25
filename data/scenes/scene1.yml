@@ -8,11 +8,11 @@ camera:
     height: 1.0
     distance: 1.0
 lights:
-  - type: ambient
+  - type: ambiant
     intensity: 0.2
   - type: omnidirectional
     intensity: 0.6
-    source:
+    position:
       x: 2.0
       y: 1.0
       z: 0.0
