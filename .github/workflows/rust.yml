@@ -16,11 +16,6 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install dependencies
       run: sudo apt update && sudo apt install -y libsdl2-dev 
-    - name: Load cache
-      uses: actions/cache@v3
-      with:
-        path: target
-        key: target
     - name: Build
       run: cargo build --verbose
     - name: Run tests
