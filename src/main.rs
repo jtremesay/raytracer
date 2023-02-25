@@ -2,7 +2,8 @@ extern crate sdl2;
 
 use raytracer::canvas::FrameBufferCanvas;
 use raytracer::image::save_canvas_to_file;
-use raytracer::loader::load_scene_from_file;
+use raytracer::loader::yaml::YamlLoader;
+use raytracer::loader::Loader;
 use raytracer::render::opengl::OpenGLRenderer;
 use raytracer::render::software::SoftwareRenderer;
 use raytracer::render::{Renderer, RendererType};
@@ -60,7 +61,7 @@ pub fn main() -> Result<(), String> {
     }
 
     // Create the scene
-    let scene = load_scene_from_file(&scene_path);
+    let scene = YamlLoader {}.load_scene_from_file(&scene_path);
 
     // Create the render
     let renderer: Box<dyn Renderer> = match renderer_type {
