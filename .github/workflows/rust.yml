@@ -21,4 +21,4 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
     - name: Do a render
-      run: cargo run -- data/scenes/scene1.yml --output image.png
+      run: cargo run -- --output image.png data/scenes/scene1.yml
