@@ -1,149 +1,133 @@
 use crate::camera::{Camera, ViewPort};
 use crate::color::Color;
-use crate::light::{AmbiantLight, DirectionalLight, OmniDirectionalLight};
+use crate::light::{AmbiantLight, DirectionalLight, Light, OmniDirectionalLight};
 use crate::material::Material;
 use crate::math::Vector3;
 use crate::scene::Scene;
-use crate::sdf::{SphereNode, UnionNode};
+use crate::sdf::{Node, SphereNode, UnionNode};
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
+use yaml_rust::Yaml;
 use yaml_rust::YamlLoader;
 
-pub fn load_scene_from_file(path: &Path) -> Scene {
-    Scene {
-        camera: Camera {
-            position: Vector3::default(),
-            view_port: ViewPort {
-                width: 1.0,
-                height: 1.0,
-                distance: 1.0,
-            },
-        },
-        root: Box::new(UnionNode {
-            nodes: vec![
-                Box::new(SphereNode {
-                    position: Vector3::new(0.0, -5001.0, 0.0),
-                    radius: 5000.0,
-                    material: Material {
-                        color: Color::YELLOW,
-                        specular: 1000.0,
-                    },
-                }),
-                Box::new(SphereNode {
-                    position: Vector3::new(0.0, -1.0, 3.0),
-                    radius: 1.0,
-                    material: Material {
-                        color: Color::RED,
-                        specular: 500.0,
-                    },
-                }),
-                Box::new(SphereNode {
-                    position: Vector3::new(2.0, 0.0, 4.0),
-                    radius: 1.0,
-                    material: Material {
-                        color: Color::BLUE,
-                        specular: 500.0,
-                    },
-                }),
-                Box::new(SphereNode {
-                    position: Vector3::new(-2.0, 0.0, 4.0),
-                    radius: 1.0,
-                    material: Material {
-                        color: Color::GREEN,
-                        specular: 10.0,
-                    },
-                }),
-            ],
-        }),
-        lights: vec![
-            Box::new(AmbiantLight { intensity: 0.2 }),
-            Box::new(OmniDirectionalLight {
-                intensity: 0.6,
-                position: Vector3::new(2.0, 1.0, 0.0),
-            }),
-            Box::new(DirectionalLight {
-                intensity: 0.2,
-                direction: Vector3::new(1.0, 4.0, 4.0),
-            }),
-        ],
+pub fn parse_vector3(data: &Yaml) -> Vector3 {
+    println!("vector3 {:?}", data);
+    Vector3::new(
+        data["x"].as_f64().unwrap() as f32,
+        data["y"].as_f64().unwrap() as f32,
+        data["z"].as_f64().unwrap() as f32,
+    )
+}
+
+pub fn parse_view_port(data: &Yaml) -> ViewPort {
+    ViewPort {
+        width: data["width"].as_f64().unwrap() as f32,
+        height: data["height"].as_f64().unwrap() as f32,
+        distance: data["distance"].as_f64().unwrap() as f32,
     }
+}
 
-    // // Read the file
-    // let mut file = File::open(path).unwrap();
-    // let mut buffer = String::new();
-    // file.read_to_string(&mut buffer).unwrap();
+pub fn parse_camera(data: &Yaml) -> Camera {
+    Camera {
+        position: parse_vector3(&data["position"]),
+        view_port: parse_view_port(&data["view_port"]),
+    }
+}
 
-    // // Parse the data
-    // let docs = YamlLoader::load_from_str(&buffer).unwrap();
-    // let scene_data = &docs[0];
+pub fn parse_union_node(data: &Yaml) -> Box<UnionNode> {
+    Box::new(UnionNode {
+        nodes: data["nodes"]
+            .to_owned()
+            .into_iter()
+            .map(|node| parse_node(&node))
+            .collect(),
+    })
+}
 
-    // // Create the scene
-    // let mut scene = Scene::new();
+fn parse_color(data: &Yaml) -> Color {
+    Color {
+        r: data["r"].as_f64().unwrap() as f32,
+        g: data["g"].as_f64().unwrap() as f32,
+        b: data["b"].as_f64().unwrap() as f32,
+    }
+}
 
-    // // Configure the camera
-    // scene.camera.position.x = scene_data["camera"]["position"]["x"].as_f64().unwrap() as f32;
-    // scene.camera.position.y = scene_data["camera"]["position"]["y"].as_f64().unwrap() as f32;
-    // scene.camera.position.z = scene_data["camera"]["position"]["z"].as_f64().unwrap() as f32;
-    // scene.camera.view_port.width =
-    //     scene_data["camera"]["view_port"]["width"].as_f64().unwrap() as f32;
-    // scene.camera.view_port.height = scene_data["camera"]["view_port"]["height"]
-    //     .as_f64()
-    //     .unwrap() as f32;
-    // scene.camera.view_port.distance = scene_data["camera"]["view_port"]["distance"]
-    //     .as_f64()
-    //     .unwrap() as f32;
+fn parse_material(data: &Yaml) -> Material {
+    Material {
+        color: parse_color(&data["color"]),
+        specular: data["specular"].as_f64().unwrap() as f32,
+    }
+}
 
-    // // Create the lights
-    // for light_data in scene_data["lights"].as_vec().unwrap().iter() {
-    //     let light_type = light_data["type"].as_str().unwrap();
-    //     let light_intensity = light_data["intensity"].as_f64().unwrap() as f32;
-    //     let light = if light_type == "ambient" {
-    //         Light::create_ambiant(light_intensity)
-    //     } else if light_type == "omnidirectional" {
-    //         Light::create_omnidirectional(
-    //             light_intensity,
-    //             Vector3::new(
-    //                 light_data["source"]["x"].as_f64().unwrap() as f32,
-    //                 light_data["source"]["y"].as_f64().unwrap() as f32,
-    //                 light_data["source"]["z"].as_f64().unwrap() as f32,
-    //             ),
-    //         )
-    //     } else if light_type == "directional" {
-    //         Light::create_directional(
-    //             light_intensity,
-    //             Vector3::new(
-    //                 light_data["direction"]["x"].as_f64().unwrap() as f32,
-    //                 light_data["direction"]["y"].as_f64().unwrap() as f32,
-    //                 light_data["direction"]["z"].as_f64().unwrap() as f32,
-    //             ),
-    //         )
-    //     } else {
-    //         panic!("Unsupported light type");
-    //     };
-    //     scene.lights.push(light)
-    // }
+pub fn parse_sphere_node(data: &Yaml) -> Box<SphereNode> {
+    Box::new(SphereNode {
+        position: parse_vector3(&data["position"]),
+        radius: data["radius"].as_f64().unwrap() as f32,
+        material: parse_material(&data["material"]),
+    })
+}
+pub fn parse_node(data: &Yaml) -> Box<dyn Node> {
+    match data["type"].as_str().unwrap() {
+        "union" => parse_union_node(data),
+        "sphere" => parse_sphere_node(data),
+        _ => panic!("unexpected node type"),
+    }
+}
 
-    // // Create the spheres
-    // for sphere_data in scene_data["spheres"].as_vec().unwrap().iter() {
-    //     let sphere = Sphere::new(
-    //         Vector3::new(
-    //             sphere_data["position"]["x"].as_f64().unwrap() as f32,
-    //             sphere_data["position"]["y"].as_f64().unwrap() as f32,
-    //             sphere_data["position"]["z"].as_f64().unwrap() as f32,
-    //         ),
-    //         sphere_data["radius"].as_f64().unwrap() as f32,
-    //         Material::new(
-    //             Color::new(
-    //                 sphere_data["material"]["color"]["r"].as_f64().unwrap() as f32,
-    //                 sphere_data["material"]["color"]["g"].as_f64().unwrap() as f32,
-    //                 sphere_data["material"]["color"]["b"].as_f64().unwrap() as f32,
-    //             ),
-    //             sphere_data["material"]["specular"].as_f64().unwrap() as f32,
-    //         ),
-    //     );
-    //     scene.spheres.push(sphere);
-    // }
+pub fn parse_ambiant_light(data: &Yaml) -> Box<AmbiantLight> {
+    Box::new(AmbiantLight {
+        intensity: data["intensity"].as_f64().unwrap() as f32,
+    })
+}
 
-    // return scene;
+pub fn parse_omnidirectional_light(data: &Yaml) -> Box<OmniDirectionalLight> {
+    Box::new(OmniDirectionalLight {
+        intensity: data["intensity"].as_f64().unwrap() as f32,
+        position: parse_vector3(&data["position"]),
+    })
+}
+
+pub fn parse_directional_light(data: &Yaml) -> Box<DirectionalLight> {
+    Box::new(DirectionalLight {
+        intensity: data["intensity"].as_f64().unwrap() as f32,
+        direction: parse_vector3(&data["direction"]),
+    })
+}
+
+pub fn parse_ligth(data: &Yaml) -> Box<dyn Light> {
+    match data["type"].as_str().unwrap() {
+        "ambiant" => parse_ambiant_light(data),
+        "omnidirectional" => parse_omnidirectional_light(data),
+        "directional" => parse_directional_light(data),
+        _ => panic!("unexpected"),
+    }
+}
+
+pub fn parse_ligths(data: &Yaml) -> Vec<Box<dyn Light>> {
+    data.to_owned()
+        .into_iter()
+        .map(|light| parse_ligth(&light))
+        .collect()
+}
+
+pub fn parse_scene(data: &Yaml) -> Scene {
+    Scene {
+        camera: parse_camera(&data["camera"]),
+        root: parse_node(&data["root"]),
+        lights: parse_ligths(&data["ligths"]),
+    }
+}
+
+pub fn load_scene_from_file(path: &Path) -> Scene {
+    // Read the file
+    let mut file = File::open(path).unwrap();
+    let mut buffer = String::new();
+    file.read_to_string(&mut buffer).unwrap();
+
+    // Parse the data
+    let docs = YamlLoader::load_from_str(&buffer).unwrap();
+    let scene_data = &docs[0];
+
+    parse_scene(scene_data)
 }
