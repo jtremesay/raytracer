@@ -12,7 +12,6 @@ use yaml_rust::Yaml;
 use yaml_rust::YamlLoader;
 
 pub fn parse_vector3(data: &Yaml) -> Vector3 {
-    println!("vector3 {:?}", data);
     Vector3::new(
         data["x"].as_f64().unwrap() as f32,
         data["y"].as_f64().unwrap() as f32,
