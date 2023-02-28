@@ -5,5 +5,7 @@ pub struct OpenGLRenderer {}
 impl OpenGLRenderer {}
 
 impl Renderer for OpenGLRenderer {
-    fn render(&self, _scene: &Scene, _canvas: &mut dyn Canvas) {}
+    fn render(&self, _scene: &Scene, _canvas: &mut dyn Canvas) {
+        todo!()
+    }
 }
