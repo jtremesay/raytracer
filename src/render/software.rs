@@ -1,4 +1,5 @@
 use crate::{
+    camera::ViewPort,
     canvas::Canvas,
     color::Color,
     light::Light,
@@ -32,34 +33,42 @@ impl SoftwareRenderer {
 
         color
     }
+
+    pub fn render_pixel(
+        &self,
+        scene: &Scene,
+        u: u32,
+        v: u32,
+        width: u32,
+        height: u32,
+        view_port: &ViewPort,
+    ) -> Color {
+        // Compute the direction of the ray
+        let direction = Vector3::new(
+            (u as f32 - width as f32 / 2.0) * view_port.width / width as f32,
+            ((v * height / width) as f32 - height as f32 / 2.0) * view_port.height / height as f32,
+            view_port.distance,
+        );
+        let ray = Ray {
+            origin: scene.camera.position,
+            direction: direction,
+        };
+
+        self.compute_color(&scene, &ray)
+    }
 }
 
 impl Renderer for SoftwareRenderer {
     fn render(&self, scene: &Scene, canvas: &mut dyn Canvas) {
-        let channel_width = canvas.width();
-        let channel_height = canvas.height();
-        let viewport_width = scene.camera.view_port.width;
-        let viewport_height = scene.camera.view_port.height;
-        let dist_to_canvas = scene.camera.view_port.distance;
+        let canvas_width = canvas.width();
+        let canvas_height = canvas.height();
+        let view_port = &scene.camera.view_port;
 
         // Draw each pixel of the canvas
-        for v in 0..channel_height {
-            for u in 0..channel_width {
-                // Compute the direction of the ray
-                let direction = Vector3::new(
-                    (u as f32 - channel_width as f32 / 2.0) * viewport_width / channel_width as f32,
-                    ((v * channel_height / channel_width) as f32 - channel_height as f32 / 2.0)
-                        * viewport_height
-                        / channel_height as f32,
-                    dist_to_canvas,
-                );
-                let ray = Ray {
-                    origin: scene.camera.position,
-                    direction: direction,
-                };
-
+        for v in 0..canvas_height {
+            for u in 0..canvas_width {
                 // Draw the pixel
-                let color = self.compute_color(&scene, &ray);
+                let color = self.render_pixel(&scene, u, v, canvas_width, canvas_height, view_port);
                 canvas.set_pixel(u, v, color);
             }
         }
