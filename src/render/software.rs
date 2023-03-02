@@ -1,5 +1,4 @@
 use crate::{
-    camera::ViewPort,
     canvas::Canvas,
     color::Color,
     light::Light,
@@ -34,21 +33,13 @@ impl SoftwareRenderer {
         color
     }
 
-    pub fn render_pixel(
-        &self,
-        scene: &Scene,
-        u: u32,
-        v: u32,
-        width: u32,
-        height: u32,
-        view_port: &ViewPort,
-    ) -> Color {
+    pub fn render_pixel(&self, scene: &Scene, u: u32, v: u32, width: u32) -> Color {
         // Compute the direction of the ray
         let direction = Vector3::new(
-            (u as f32 - width as f32 / 2.0) * view_port.width / width as f32,
-            ((v * height / width) as f32 - height as f32 / 2.0) * view_port.height / height as f32,
-            view_port.distance,
-        );
+            (u as f32 / width as f32) - 0.5,
+            (v as f32 / width as f32) - 0.5,
+            1.0,
+        ) * scene.camera.view_port;
         let ray = Ray {
             origin: scene.camera.position,
             direction: direction,
@@ -62,13 +53,12 @@ impl Renderer for SoftwareRenderer {
     fn render(&self, scene: &Scene, canvas: &mut dyn Canvas) {
         let canvas_width = canvas.width();
         let canvas_height = canvas.height();
-        let view_port = &scene.camera.view_port;
 
         // Draw each pixel of the canvas
         for v in 0..canvas_height {
             for u in 0..canvas_width {
                 // Draw the pixel
-                let color = self.render_pixel(&scene, u, v, canvas_width, canvas_height, view_port);
+                let color = self.render_pixel(&scene, u, v, canvas_width);
                 canvas.set_pixel(u, v, color);
             }
         }

@@ -1,4 +1,4 @@
-use crate::camera::{Camera, ViewPort};
+use crate::camera::Camera;
 use crate::color::Color;
 use crate::light::{AmbiantLight, DirectionalLight, Light, OmniDirectionalLight};
 use crate::material::Material;
@@ -25,22 +25,12 @@ impl LispSaver {
         write!(out, "(vector3 {} {} {})", vector.x, vector.y, vector.z).unwrap();
     }
 
-    pub fn write_view_port(&self, out: &mut dyn Write, view_port: &ViewPort, level: u32) {
-        self.write_indent(out, level);
-        write!(
-            out,
-            "(view_port {} {} {})",
-            view_port.width, view_port.height, view_port.distance
-        )
-        .unwrap();
-    }
-
     pub fn write_camera(&self, out: &mut dyn Write, camera: &Camera, level: u32) {
         self.write_indent(out, level);
         write!(out, "(camera ").unwrap();
         self.write_vector3(out, &camera.position, level + 1);
         write!(out, " ").unwrap();
-        self.write_view_port(out, &camera.view_port, level + 1);
+        self.write_vector3(out, &camera.view_port, level + 1);
         write!(out, ")").unwrap();
     }
 

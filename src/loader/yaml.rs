@@ -1,4 +1,4 @@
-use crate::camera::{Camera, ViewPort};
+use crate::camera::Camera;
 use crate::color::Color;
 use crate::light::{AmbiantLight, DirectionalLight, Light, OmniDirectionalLight};
 use crate::material::Material;
@@ -24,18 +24,10 @@ impl YamlLoader {
         )
     }
 
-    pub fn parse_view_port(&self, data: &Yaml) -> ViewPort {
-        ViewPort {
-            width: data["width"].as_f64().unwrap() as f32,
-            height: data["height"].as_f64().unwrap() as f32,
-            distance: data["distance"].as_f64().unwrap() as f32,
-        }
-    }
-
     pub fn parse_camera(&self, data: &Yaml) -> Camera {
         Camera {
             position: self.parse_vector3(&data["position"]),
-            view_port: self.parse_view_port(&data["view_port"]),
+            view_port: self.parse_vector3(&data["view_port"]),
         }
     }
 
